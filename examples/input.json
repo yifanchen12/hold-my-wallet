@@ -1,0 +1,7 @@
+{
+  "currency": "CNY",
+  "one_time": [{"label": "首付", "amount": "200"}],
+  "installments": [{"label": "分期款", "amount_per_period": "100", "periods": 10}],
+  "fees": [{"label": "页面列出的手续费", "amount": "30"}],
+  "unknown_costs": ["提前结清费用未提供"]
+}

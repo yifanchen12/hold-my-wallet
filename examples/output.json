@@ -1,0 +1,13 @@
+{
+  "currency": "CNY",
+  "breakdown": [
+    {"label": "首付", "kind": "一次性", "amount": "200.00"},
+    {"label": "分期款", "kind": "分期", "amount": "1000.00", "periods": "10"},
+    {"label": "页面列出的手续费", "kind": "其他费用", "amount": "30.00"}
+  ],
+  "known_total": "1230.00",
+  "unknown_costs": ["提前结清费用未提供"],
+  "total_is_complete": false,
+  "offer_comparisons": [],
+  "basis": "只计算用户明确提供的金额与次数；未填项目不视为 0 元。"
+}
