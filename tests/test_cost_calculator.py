@@ -47,6 +47,15 @@ class CostCalculatorTests(unittest.TestCase):
         result = cost_calculator.calculate({"one_time": [{"amount": "0.10"}, {"amount": "0.20"}]})
         self.assertEqual(result["known_total"], "0.30")
 
+    def test_more_than_two_decimal_places_are_not_rounded(self):
+        result = cost_calculator.calculate({"one_time": [{"amount": "1.005"}]})
+        self.assertEqual(result["known_total"], "1.005")
+        self.assertEqual(result["breakdown"][0]["amount"], "1.005")
+
+    def test_precision_is_preserved_after_multiplication(self):
+        result = cost_calculator.calculate({"installments": [{"amount_per_period": "0.335", "periods": 3}]})
+        self.assertEqual(result["known_total"], "1.005")
+
     def test_negative_amount_rejected(self):
         with self.assertRaises(cost_calculator.InputError):
             cost_calculator.calculate({"one_time": [{"amount": "-1"}]})

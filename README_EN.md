@@ -48,7 +48,7 @@ Input: “The plan is ¥39 per month for 12 months, with a ¥20 setup fee. Is th
 
 Output: “**Known from your description:** 12 monthly payments of ¥39 and a ¥20 setup fee. **Calculated total:** ¥39 × 12 + ¥20 = **¥488**. **Unknown:** tax, cancellation charges, payment fees, and whether the setup fee is already included. This calculation is not a quote from the seller.”
 
-For money calculations, the included Python script uses explicit inputs and decimal arithmetic; it does not look up prices or invent missing charges.
+For money calculations, the included Python script uses explicit inputs and decimal arithmetic; it preserves supplied precision instead of silently rounding to two decimal places. It does not look up prices or invent missing charges.
 
 ## Reference library
 

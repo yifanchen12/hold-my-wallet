@@ -13,6 +13,15 @@ class InputError(ValueError):
     """Raised when an amount or count is missing or invalid."""
 
 
+def _money(value: Decimal) -> str:
+    """Format without rounding away precision supplied by the user."""
+    rendered = format(value, "f")
+    if "." not in rendered:
+        return rendered + ".00"
+    whole, fraction = rendered.split(".", 1)
+    return f"{whole}.{fraction.ljust(2, '0')}"
+
+
 def _amount(value: Any, field: str) -> Decimal:
     if isinstance(value, bool) or not isinstance(value, (str, int, Decimal)):
         raise InputError(f"{field}: 金额必须以字符串或整数提供")
@@ -53,7 +62,7 @@ def calculate(data: dict[str, Any]) -> dict[str, Any]:
         label = str(row.get("label") or f"一次性费用 {index}")
         amount = _amount(row.get("amount"), f"one_time[{index}].amount")
         total += amount
-        breakdown.append({"label": label, "kind": "一次性", "amount": f"{amount:.2f}"})
+        breakdown.append({"label": label, "kind": "一次性", "amount": _money(amount)})
 
     for index, row in enumerate(_rows(data.get("recurring"), "recurring"), 1):
         label = str(row.get("label") or f"周期费用 {index}")
@@ -61,7 +70,7 @@ def calculate(data: dict[str, Any]) -> dict[str, Any]:
         periods = _count(row.get("periods"), f"recurring[{index}].periods")
         line_total = amount * periods
         total += line_total
-        breakdown.append({"label": label, "kind": "周期费用", "amount": f"{line_total:.2f}", "periods": str(periods)})
+        breakdown.append({"label": label, "kind": "周期费用", "amount": _money(line_total), "periods": str(periods)})
 
     for index, row in enumerate(_rows(data.get("installments"), "installments"), 1):
         label = str(row.get("label") or f"分期 {index}")
@@ -69,13 +78,13 @@ def calculate(data: dict[str, Any]) -> dict[str, Any]:
         periods = _count(row.get("periods"), f"installments[{index}].periods")
         line_total = amount * periods
         total += line_total
-        breakdown.append({"label": label, "kind": "分期", "amount": f"{line_total:.2f}", "periods": str(periods)})
+        breakdown.append({"label": label, "kind": "分期", "amount": _money(line_total), "periods": str(periods)})
 
     for index, row in enumerate(_rows(data.get("fees"), "fees"), 1):
         label = str(row.get("label") or f"其他费用 {index}")
         amount = _amount(row.get("amount"), f"fees[{index}].amount")
         total += amount
-        breakdown.append({"label": label, "kind": "其他费用", "amount": f"{amount:.2f}"})
+        breakdown.append({"label": label, "kind": "其他费用", "amount": _money(amount)})
 
     comparisons: list[dict[str, str]] = []
     for index, row in enumerate(_rows(data.get("offer_comparisons"), "offer_comparisons"), 1):
@@ -83,9 +92,9 @@ def calculate(data: dict[str, Any]) -> dict[str, Any]:
         offer = _amount(row.get("offer_amount"), f"offer_comparisons[{index}].offer_amount")
         comparisons.append({
             "label": str(row.get("label") or f"优惠对比 {index}"),
-            "reference_amount": f"{original:.2f}",
-            "offer_amount": f"{offer:.2f}",
-            "difference": f"{(original - offer):.2f}",
+            "reference_amount": _money(original),
+            "offer_amount": _money(offer),
+            "difference": _money(original - offer),
             "note": "仅按输入数字相减；参考价是否真实、是否为历史价未核实。",
         })
 
@@ -96,7 +105,7 @@ def calculate(data: dict[str, Any]) -> dict[str, Any]:
     return {
         "currency": str(data.get("currency") or "CNY"),
         "breakdown": breakdown,
-        "known_total": f"{total:.2f}",
+        "known_total": _money(total),
         "unknown_costs": [str(item) for item in unknown_costs],
         "total_is_complete": len(unknown_costs) == 0 and bool(breakdown),
         "offer_comparisons": comparisons,
